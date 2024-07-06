@@ -1,15 +1,11 @@
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 import sqlite3
-import os
 import matplotlib.pyplot as plt
-import numpy as np
-
 
 def create_db():
-    conn = sqlite3.connect('patient_data1.db')
+    conn = sqlite3.connect('patient_data.db')
     c = conn.cursor()
-    # יצירת טבלאות חדשות אם הן לא קיימות
     c.execute('''
         CREATE TABLE IF NOT EXISTS patients (
             identity_number TEXT PRIMARY KEY,
@@ -34,7 +30,6 @@ def create_db():
     conn.close()
     print("Database checked and initialized successfully.")
 
-
 def register_user():
     email = reg_email_entry.get()
     password = reg_password_entry.get()
@@ -50,7 +45,6 @@ def register_user():
     conn.close()
     reg_status_label.config(text="Registration successful!", fg="green")
 
-
 def login_user():
     email = login_email_entry.get()
     password = login_password_entry.get()
@@ -64,11 +58,9 @@ def login_user():
     if user:
         login_status_label.config(text="Login successful!", fg="green")
         login_window.destroy()
-
         open_main_window()
     else:
         login_status_label.config(text="Login failed. Check your email and password.", fg="red")
-
 
 def open_register_window():
     global reg_email_entry, reg_password_entry, reg_full_name_entry, reg_phone_entry, reg_identity_entry, reg_status_label
@@ -102,7 +94,6 @@ def open_register_window():
     reg_status_label = tk.Label(register_window, text="", font=("Arial", 12))
     reg_status_label.grid(row=6, column=0, columnspan=2, pady=10)
 
-
 def open_login_window():
     global login_email_entry, login_password_entry, login_status_label, login_window
     login_window = tk.Toplevel(root)
@@ -121,7 +112,6 @@ def open_login_window():
 
     login_status_label = tk.Label(login_window, text="", font=("Arial", 12))
     login_status_label.grid(row=3, column=0, columnspan=2, pady=10)
-
 
 def submit_data():
     try:
@@ -149,7 +139,6 @@ def submit_data():
         print(f"Error: {e}")
         status_label.config(text=f"Error: {e}", fg="red")
 
-
 def display_data():
     conn = sqlite3.connect('patient_data.db')
     c = conn.cursor()
@@ -162,7 +151,6 @@ def display_data():
 
     for row in rows:
         tree.insert('', 'end', values=row)
-
 
 def plot_levels(level_type):
     conn = sqlite3.connect('patient_data.db')
@@ -180,7 +168,6 @@ def plot_levels(level_type):
     plt.ylabel(f'{level_type.replace("_", " ").title()}')
     plt.title(f'{level_type.replace("_", " ").title()} of Patients')
     plt.show()
-
 
 def analyze_data():
     conn = sqlite3.connect('patient_data.db')
@@ -203,7 +190,6 @@ def analyze_data():
     result_text.delete(1.0, tk.END)
     for recommendation in recommendations:
         result_text.insert(tk.END, recommendation + "\n")
-
 
 def plot_distribution():
     conn = sqlite3.connect('patient_data.db')
@@ -246,7 +232,6 @@ def plot_distribution():
 
     plt.tight_layout()
     plt.show()
-
 
 def edit_patient():
     selected_item = tree.selection()
@@ -321,7 +306,6 @@ def edit_patient():
     save_button = tk.Button(edit_window, text="Save Changes", command=save_changes, bg="#4CAF50", fg="white")
     save_button.grid(row=7, column=0, columnspan=2, pady=10)
 
-
 def delete_patient():
     selected_item = tree.selection()
     if not selected_item:
@@ -341,7 +325,6 @@ def delete_patient():
     update_patient_list()
     status_label.config(text="Patient data deleted successfully!", fg="green")
 
-
 def update_patient_list():
     conn = sqlite3.connect('patient_data.db')
     c = conn.cursor()
@@ -354,7 +337,6 @@ def update_patient_list():
 
     for patient in patients:
         tree.insert('', 'end', values=patient)
-
 
 def open_bmr_bmi_calculator():
     def open_bmr_calculator():
@@ -429,7 +411,84 @@ def open_bmr_bmi_calculator():
     bmr_bmi_menu.add_command(label="BMR Calculator", command=open_bmr_calculator)
     bmr_bmi_menu.add_command(label="BMI Calculator", command=open_bmi_calculator)
 
+def open_questionnaire():
+    global question1_var, question2_var, question3_var, question4_var, question5_var, result_text, questionnaire_window
 
+    questionnaire_window = tk.Toplevel(window)
+    questionnaire_window.title("Liver Cirrhosis Questionnaire")
+
+    # Variables to store questionnaire answers
+    question1_var = tk.StringVar(master=questionnaire_window)
+    question2_var = tk.StringVar(master=questionnaire_window)
+    question3_var = tk.StringVar(master=questionnaire_window)
+    question4_var = tk.StringVar(master=questionnaire_window)
+    question5_var = tk.StringVar(master=questionnaire_window)
+
+    # Questionnaire GUI elements
+    tk.Label(questionnaire_window, text="Question 1: Do you have swelling in your legs or abdomen?", font=("Arial", 12)).grid(row=0, column=0, padx=10, pady=5)
+    tk.Radiobutton(questionnaire_window, text="Yes", variable=question1_var, value="Yes").grid(row=0, column=1, padx=10, pady=5, sticky="w")
+    tk.Radiobutton(questionnaire_window, text="No", variable=question1_var, value="No").grid(row=0, column=2, padx=10, pady=5, sticky="w")
+
+    tk.Label(questionnaire_window, text="Question 2: Do you experience jaundice (yellowing of the skin or eyes)?", font=("Arial", 12)).grid(row=1, column=0, padx=10, pady=5)
+    tk.Radiobutton(questionnaire_window, text="Yes", variable=question2_var, value="Yes").grid(row=1, column=1, padx=10, pady=5, sticky="w")
+    tk.Radiobutton(questionnaire_window, text="No", variable=question2_var, value="No").grid(row=1, column=2, padx=10, pady=5, sticky="w")
+
+    tk.Label(questionnaire_window, text="Question 3: Do you have fatigue or weakness?", font=("Arial", 12)).grid(row=2, column=0, padx=10, pady=5)
+    tk.Radiobutton(questionnaire_window, text="Yes", variable=question3_var, value="Yes").grid(row=2, column=1, padx=10, pady=5, sticky="w")
+    tk.Radiobutton(questionnaire_window, text="No", variable=question3_var, value="No").grid(row=2, column=2, padx=10, pady=5, sticky="w")
+
+    tk.Label(questionnaire_window, text="Question 4: Do you experience confusion or difficulty thinking?", font=("Arial", 12)).grid(row=3, column=0, padx=10, pady=5)
+    tk.Radiobutton(questionnaire_window, text="Yes", variable=question4_var, value="Yes").grid(row=3, column=1, padx=10, pady=5, sticky="w")
+    tk.Radiobutton(questionnaire_window, text="No", variable=question4_var, value="No").grid(row=3, column=2, padx=10, pady=5, sticky="w")
+
+    tk.Label(questionnaire_window, text="Question 5: Do you have gastrointestinal bleeding?", font=("Arial", 12)).grid(row=4, column=0, padx=10, pady=5)
+    tk.Radiobutton(questionnaire_window, text="Yes", variable=question5_var, value="Yes").grid(row=4, column=1, padx=10, pady=5, sticky="w")
+    tk.Radiobutton(questionnaire_window, text="No", variable=question5_var, value="No").grid(row=4, column=2, padx=10, pady=5, sticky="w")
+
+    # Button to submit questionnaire
+    submit_button = tk.Button(questionnaire_window, text="Submit", font=("Arial", 12), command=submit_questionnaire, bg="#4CAF50", fg="white", padx=10, pady=5)
+    submit_button.grid(row=5, column=0, columnspan=3, pady=10)
+
+
+
+# Function to process questionnaire submission
+def submit_questionnaire():
+    try:
+        # Get answers from the questionnaire
+        answers = {
+            "question1": question1_var.get(),
+            "question2": question2_var.get(),
+            "question3": question3_var.get(),
+            "question4": question4_var.get(),
+            "question5": question5_var.get(),
+        }
+
+        # Display answers in a message box (for testing)
+        messagebox.showinfo("Questionnaire Answers", f"Q1: {answers['question1']}\nQ2: {answers['question2']}\nQ3: {answers['question3']}\nQ4: {answers['question4']}\nQ5: {answers['question5']}")
+
+        # Generate recommendations based on answers
+        recommendations = []
+        if answers["question1"] == "Yes":
+            recommendations.append("Monitor for edema or ascites and consider diuretics.")
+        if answers["question2"] == "Yes":
+            recommendations.append("Check bilirubin levels and liver function tests.")
+        if answers["question3"] == "Yes":
+            recommendations.append("Evaluate for anemia and nutritional deficiencies.")
+        if answers["question4"] == "Yes":
+            recommendations.append("Consider hepatic encephalopathy and check ammonia levels.")
+        if answers["question5"] == "Yes":
+            recommendations.append("Investigate for varices and consider endoscopy.")
+
+        # Clear previous recommendations and display new ones
+        result_text.delete(1.0, tk.END)
+        for recommendation in recommendations:
+            result_text.insert(tk.END, recommendation + "\n")
+
+        # Close the questionnaire window
+        questionnaire_window.destroy()
+
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
 
 def main_window():
     global id_entry, name_entry, age_entry, protein_entry, ast_entry, alt_entry, weight_entry, height_entry, status_label, tree, result_text, window
@@ -519,6 +578,9 @@ def main_window():
                               bg="#009688", fg="white", padx=10, pady=5)
     report_button.grid(row=0, column=8, padx=10)
 
+    questionnaire_button = tk.Button(button_frame, text="Medical Questionnaire", font=("Arial", 12), command=open_questionnaire, bg="#4CAF50", fg="white", padx=10, pady=5)
+    questionnaire_button.grid(row=0, column=9, padx=10 ,pady=5)
+
     open_bmr_bmi_calculator()
 
     status_label = tk.Label(window, text="", font=("Arial", 12), bg="#f0f0f0")
@@ -545,10 +607,8 @@ def main_window():
     create_db()  # Create the database and table when the application starts
     window.mainloop()
 
-
 def open_main_window():
     main_window()
-
 
 if __name__ == "__main__":
     root = tk.Tk()
@@ -556,10 +616,12 @@ if __name__ == "__main__":
 
     tk.Label(root, text="Liver Cirrhosis DSS", font=("Arial", 20, "bold")).pack(pady=20)
 
-    login_button = tk.Button(root, text="Login", font=("Arial", 12), command=open_login_window, bg="#4CAF50", fg="white", padx=10, pady=5)
+    login_button = tk.Button(root, text="Login", font=("Arial", 12), command=open_login_window, bg="#4CAF50",
+                             fg="white", padx=10, pady=5)
     login_button.pack(pady=10)
 
-    register_button = tk.Button(root, text="Register", font=("Arial", 12), command=open_register_window, bg="#2196F3", fg="white", padx=10, pady=5)
+    register_button = tk.Button(root, text="Register", font=("Arial", 12), command=open_register_window, bg="#2196F3",
+                                fg="white", padx=10, pady=5)
     register_button.pack(pady=10)
 
     create_db()  # Make sure to create the database and tables when the application starts
